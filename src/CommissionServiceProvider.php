@@ -28,6 +28,7 @@ class CommissionServiceProvider extends ServiceProvider
             __DIR__.'/../config/commission.php',
             'commission'
         );
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     protected function getMigrationFileName(Filesystem $filesystem): string
