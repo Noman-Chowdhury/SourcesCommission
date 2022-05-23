@@ -17,7 +17,7 @@ class CommissionServiceProvider extends ServiceProvider
             ], 'config');
 
             $this->publishes([
-                __DIR__.'/../database/migrations/create_referrers_tables.php.stub' => $this->getMigrationFileName($filesystem),
+                __DIR__.'/../database/migrations/create_referrers_table.php.stub' => $this->getMigrationFileName($filesystem),
             ], 'migrations');
         }
     }
