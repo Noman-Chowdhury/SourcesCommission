@@ -291,14 +291,15 @@ trait CommissionTrait
      * @param $item
      * @param $model
      * @param $affiliate_user
-     * @param $type
+     * @param string $type
      * @param $total_only
      * @return void
      * @throws \JsonException
      */
-    public function incrementStatistics($item, $model, $affiliate_user, $type = 'click', $total_only = false): void
+    public function incrementStatistics($item, $model, $refer_code, string $type = 'click', bool $total_only = false): void
     {
 
+        $affiliate_user = $this->getAffiliateUserData($refer_code);
         if ($model === 'App\Models\Seller\Product' || $model === 'App\Models\Seller\Service') {
             $this->sourcesProductServiceStatistics($item, $model, $type);
         }
