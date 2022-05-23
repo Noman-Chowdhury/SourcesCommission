@@ -11,6 +11,7 @@ class CommissionServiceProvider extends ServiceProvider
 {
     public function boot(Filesystem $filesystem)
     {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         if (function_exists('config_path')) { // function not available and 'publish' not relevant in Lumen
             $this->publishes([
                 __DIR__.'/../config/commission.php' => config_path('commission.php'),
@@ -27,7 +28,6 @@ class CommissionServiceProvider extends ServiceProvider
             __DIR__.'/../config/commission.php',
             'commission'
         );
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     protected function getMigrationFileName(Filesystem $filesystem): string
