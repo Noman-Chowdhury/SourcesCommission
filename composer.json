@@ -1,0 +1,19 @@
+{
+    "name": "sources/affiliate-commission",
+    "description": "This is a package for sources affiliate program",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Sources\\AffiliateCommission\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Noman-Chowdhury",
+            "email": "orkib420@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
