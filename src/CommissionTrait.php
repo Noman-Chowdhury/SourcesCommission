@@ -13,11 +13,16 @@ use Sources\AffiliateCommission\Models\Referrer;
 trait CommissionTrait
 {
 
+    public function isCommissionActive()
+    {
+        $data =  DB::connection('affiliate')->table('settings')->find(1)->data;
+        return json_decode($data, false)->affiliate_status && (json_decode($data, false)->affiliate_status || json_decode($data, false)->affiliate_status==='true');
+    }
+
     public function getBannerData($banner_id)
     {
         return DB::connection('affiliate')->table('banners')->find($banner_id);
     }
-
 
     public function findBannerOfferCommission($offer_id)
     {
