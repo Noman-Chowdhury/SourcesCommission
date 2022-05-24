@@ -3,8 +3,6 @@
 namespace Sources\AffiliateCommission;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Sources\AffiliateCommission\Models\Referrer;
@@ -14,48 +12,30 @@ use Sources\AffiliateCommission\Models\Referrer;
  */
 trait CommissionTrait
 {
-    /**
-     * @param $banner_id
-     * @return Builder|mixed
-     */
+
     public function getBannerData($banner_id)
     {
         return DB::connection('affiliate')->table('banners')->find($banner_id);
     }
 
-    /**
-     * @param $offer_id
-     * @return mixed
-     */
+
     public function findBannerOfferCommission($offer_id)
     {
         return DB::connection('affiliate')->table('commission_offers')->find($offer_id)->commission;
     }
 
-    /**
-     * @param $commission_type
-     * @return Model|Builder|object
-     */
     public function getCommissionData($commission_type)
     {
         return DB::connection('affiliate')->table('commissions')->where(['type' => $commission_type])->first()->commission;
     }
 
-    /**
-     * @param $referral_code
-     * @return Model|Builder|object
-     */
+
     public function getAffiliateUserData($referral_code)
     {
-        return DB::connection('affiliate')->table('users')->where('referral_code', $referral_code)->first();
+        return DB::connection('affiliate')->table('users')->where('referral_code', 'dHmObjpge2')->first();
     }
 
-    /**
-     * @param $user_id
-     * @param bool $increment
-     * @param int $amount
-     * @return bool|Model|Builder
-     */
+
     public function findOrCreateAffiliateUserWallet($user_id, bool $increment = true, int $amount = 0)
     {
         try {
@@ -78,13 +58,8 @@ trait CommissionTrait
         return $wallet;
     }
 
-    /**
-     * @param $user_id
-     * @param $wallet
-     * @param $amount
-     * @return void
-     */
-    public function incrementWalletBalance($user_id, $wallet, $amount): void
+
+    public function incrementWalletBalance($user_id, $wallet, $amount)
     {
         try {
             DB::connection('affiliate')->table('wallets')->where('user_id', $user_id)->limit(1)->update([
@@ -95,15 +70,8 @@ trait CommissionTrait
         }
     }
 
-    /**
-     * @param $user_id
-     * @param $commission_type
-     * @param $banner
-     * @param $extra_info
-     * @return void
-     * @throws \JsonException
-     */
-    public function insertCommissionInfo($user_id, $commission_type, $banner = null, $extra_info = null): void
+
+    public function insertCommissionInfo($user_id, $commission_type, $banner = null, $extra_info = null)
     {
         try {
             DB::connection('affiliate')->table('aff_commission_histories')->insert([
@@ -114,7 +82,7 @@ trait CommissionTrait
                 'type' => $commission_type,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'information' => json_encode($extra_info, JSON_THROW_ON_ERROR),
+                'information' => json_encode($extra_info),
             ]);
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
@@ -123,13 +91,6 @@ trait CommissionTrait
 
     }
 
-    /**
-     * @param $commission_type
-     * @param $user_type
-     * @param null $user
-     * @return void
-     * @throws \JsonException
-     */
     public function bannerRegistrationCommission($commission_type, $user_type, $user = null, $host = null): void
     {
         $user = request()->user() ?? $user;
@@ -137,21 +98,15 @@ trait CommissionTrait
             $affiliate_user = $this->getAffiliateUserData($user->referred->referrer);
             $domain = $this->getDomainInfo($host ?? $user->referred->host);
             if ($domain && $domain->status === 'approved' && $affiliate_user && $domain->verified) {
-                $banner_id = json_decode($user->referred->info, true, 512, JSON_THROW_ON_ERROR)['banner_id'];
+                $banner_id = json_decode($user->referred->info, true, 512)['banner_id'];
                 $extra_info = ['name' => $user->name, 'user_type' => $user_type];
                 $this->insertCommissionInfo($affiliate_user->id, $commission_type, $this->getBannerData($banner_id), $extra_info);
             }
         }
     }
 
-    /**
-     * @param $commission_type
-     * @param $user_type
-     * @param null $user
-     * @return void
-     * @throws \JsonException
-     */
-    public function directRegistrationCommission($commission_type, $user_type, $user = null): void
+
+    public function directRegistrationCommission($commission_type, $user_type, $user = null)
     {
         $user = request()->user() ?? $user;
         if ($user->referred) {
@@ -163,11 +118,7 @@ trait CommissionTrait
         }
     }
 
-
-    /**
-     * @throws \JsonException
-     */
-    public function storeReferrerData($userData): void
+    public function storeReferrerData($userData)
     {
         try {
             $commission = null;
@@ -181,7 +132,7 @@ trait CommissionTrait
                 }
                 $info = json_encode([
                     'banner_id' => $banner->id,
-                ], JSON_THROW_ON_ERROR);
+                ]);
             }
             if (request()->u !== 'null') {
                 $referrer = request()->u;
@@ -203,9 +154,6 @@ trait CommissionTrait
         }
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
     public function referred()
     {
         return self::morphOne(Referrer::class, 'referred', 'user_type', 'user_id');
@@ -218,29 +166,19 @@ trait CommissionTrait
         try {
             $type = $userData->referred->info !== NULL ? 'banner' : 'direct';
             $commission_type = $user_type . '-' . $type . '-registration';
-
-            $userData->referred->info !== NULL ? $this->bannerRegistrationCommission($commission_type, $user_type) : $this->directRegistrationCommission($commission_type, $user_type);
-
+            $userData->referred->info !== NULL ? $this->bannerRegistrationCommission($commission_type, $user_type, $userData) : $this->directRegistrationCommission($commission_type, $user_type, $userData);
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
     }
 
-    /**
-     * @param $host
-     * @return Model|Builder|object|null
-     */
     public function getDomainInfo($host)
     {
         return DB::connection('affiliate')->table('user_sites')->where('code', $host)->first();
     }
 
-    /**
-     * @throws \JsonException
-     */
-    public function giveClickViewCommissionByCookie($refer_code = null, $encoded_banner = null, $cookie_name = '_ar_click'): void
+    public function giveClickViewCommissionByCookie($refer_code = null, $encoded_banner = null, $cookie_name = '_ar_click')
     {
-
         $refer_code = $refer_code ?? request()->u;
         $encoded_banner = $encoded_banner ?? request()->b;
         if (request()->headers->get('referer') && request()->b) {
@@ -259,10 +197,7 @@ trait CommissionTrait
         }
     }
 
-    /**
-     * @throws \JsonException
-     */
-    public function giveClickCommission($refer_code, $encoded_banner): void
+    public function giveClickCommission($refer_code, $encoded_banner)
     {
         $referrer_site = request()->headers->get('referer');
         $host = base64_encode(parse_url($referrer_site)['host']);
@@ -277,25 +212,12 @@ trait CommissionTrait
         }
     }
 
-    /**
-     * @param $item
-     * @param $model
-     * @return Model|Builder|object|null
-     */
     public function getStatisticsData($item, $model)
     {
         return DB::connection('affiliate')->table('statistics')->where(['reportable_id' => $item->id, 'reportable_type' => $model])->latest()->first();
     }
 
-    /**
-     * @param $item
-     * @param $model
-     * @param $affiliate_user
-     * @param string $type
-     * @param $total_only
-     * @return void
-     * @throws \JsonException
-     */
+
     public function incrementStatistics($item, $model, $refer_code, string $type = 'click', bool $total_only = false): void
     {
 
@@ -322,7 +244,7 @@ trait CommissionTrait
             DB::connection('affiliate')->table('statistics')->insert([
                 'user_id' => $affiliate_user->id,
                 'ip_address' => request()->ip(),
-                'user_agent' => json_encode(\request()->server('HTTP_USER_AGENT'), JSON_THROW_ON_ERROR | true),
+                'user_agent' => json_encode(\request()->server('HTTP_USER_AGENT')),
                 'reportable_id' => $item->id,
                 'reportable_type' => $model,
                 'view' => $view,
@@ -335,12 +257,6 @@ trait CommissionTrait
         }
     }
 
-    /**
-     * @param $item
-     * @param $model
-     * @param $type
-     * @return void
-     */
     public function sourcesProductServiceStatistics($item, $model, $type)
     {
         $savedCommission = 0;
