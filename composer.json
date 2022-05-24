@@ -3,6 +3,9 @@
     "description": "This is a package for sources affiliate program",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "sources", "affiliate-commission", "commission", "affiliate"
+    ],
     "autoload": {
         "psr-4": {
             "Sources\\AffiliateCommission\\": "src/"
@@ -15,7 +18,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "laravel/framework": "^8.12"
+    },
     "extra": {
         "laravel": {
             "providers": [
