@@ -15,8 +15,8 @@ trait CommissionTrait
 
     public function isCommissionActive()
     {
-        $data =  DB::connection('affiliate')->table('settings')->find(1)->data;
-        return json_decode($data, false)->affiliate_status && (json_decode($data, false)->affiliate_status || json_decode($data, false)->affiliate_status==='true');
+        $data = DB::connection('affiliate')->table('settings')->find(1)->data;
+        return json_decode($data, false)->affiliate_status && (json_decode($data, false)->affiliate_status || json_decode($data, false)->affiliate_status === 'true');
     }
 
     public function getBannerData($banner_id)
@@ -146,14 +146,16 @@ trait CommissionTrait
                     $referrer = request()->referrer_code;
                 }
             }
-            Models\Referrer::create([
-                'user_id' => $userData->id,
-                'user_type' => get_class($userData),
-                'referrer' => $referrer,
-                'host' => request()->h ?? null,
-                'commission' => $commission,
-                'info' => $info
-            ]);
+            if (request()->referrer_code || request()->u !== 'null' || request()->b !== 'null') {
+                Models\Referrer::create([
+                    'user_id' => $userData->id,
+                    'user_type' => get_class($userData),
+                    'referrer' => $referrer,
+                    'host' => request()->h ?? null,
+                    'commission' => $commission,
+                    'info' => $info
+                ]);
+            }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
