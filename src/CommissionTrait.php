@@ -171,9 +171,9 @@ trait CommissionTrait
     public function giveCommission($userData, $user_type)
     {
         try {
-            $type = $userData->referred->info !== NULL ? 'banner' : 'direct';
+            $type = $userData->referred && $userData->referred->info !== NULL ? 'banner' : 'direct';
             $commission_type = $user_type . '-' . $type . '-registration';
-            $userData->referred->info !== NULL ? $this->bannerRegistrationCommission($commission_type, $user_type, $userData) : $this->directRegistrationCommission($commission_type, $user_type, $userData);
+            $userData->referred && $userData->referred->info !== NULL ? $this->bannerRegistrationCommission($commission_type, $user_type, $userData) : $this->directRegistrationCommission($commission_type, $user_type, $userData);
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
