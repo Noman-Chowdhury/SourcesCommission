@@ -31,7 +31,7 @@ trait CommissionTrait
 
     public function getCommissionData($commission_type)
     {
-        return DB::connection('affiliate')->table('commissions')->where(['type' => $commission_type])->first()->commission;
+        return DB::connection('affiliate')->table('commissions')->where(['type' => $commission_type])->first()->commission ?? 0;
     }
 
 
@@ -131,7 +131,7 @@ trait CommissionTrait
             $referrer = null;
             if (request()->b !== 'null') {
                 $banner = $this->getBannerData(base64_decode(request()->b));
-                if ($banner && $banner->offer_id) {
+                if ($banner->offer_id) {
                     $offer = $this->findBannerOfferCommission($banner->offer_id);
                     $commission = $offer->user_commission;
                 }
