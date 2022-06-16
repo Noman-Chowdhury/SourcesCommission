@@ -131,13 +131,15 @@ trait CommissionTrait
             $referrer = null;
             if (request()->b !== 'null') {
                 $banner = $this->getBannerData(base64_decode(request()->b));
-                if ($banner && $banner->offer_id) {
-                    $offer = $this->findBannerOfferCommission($banner->offer_id);
-                    $commission = $offer->user_commission;
+                if ($banner){
+                    if ($banner->offer_id) {
+                        $offer = $this->findBannerOfferCommission($banner->offer_id);
+                        $commission = $offer->user_commission;
+                    }
+                    $info = json_encode([
+                        'banner_id' => $banner->id,
+                    ]);
                 }
-                $info = json_encode([
-                    'banner_id' => $banner->id,
-                ]);
             }
             if (request()->u !== 'null') {
                 $referrer = request()->u;
